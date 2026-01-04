@@ -23,6 +23,17 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type - only allow safe image formats (no SVG/HTML)
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        console.error('Invalid file type. Only PNG, JPEG, GIF, and WebP are allowed.');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        console.error('File too large. Maximum size is 5MB.');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (event) => {
         const url = event.target?.result as string;
@@ -81,7 +92,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
                 </button>
               </div>
             )}
-            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/*" className="hidden" />
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/png,image/jpeg,image/gif,image/webp" className="hidden" />
           </div>
 
           {/* Ant Size Slider */}
