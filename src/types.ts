@@ -10,6 +10,7 @@ export interface Particle {
   acc: Vector2D;
   size: number;
   maxSpeed: number;
+  idleSpeed: number;
   maxForce: number;
   angle: number;
   bodyRatio: number;

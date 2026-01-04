@@ -45,6 +45,8 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
     for (let i = 0; i < config.particleCount; i++) {
       const variety = Math.random();
       const startPos = { x: Math.random() * width, y: Math.random() * height };
+      // Each ant has its own idle speed multiplier (0.3 to 1.0)
+      const idleSpeedMultiplier = 0.3 + Math.random() * 0.7;
       p.push({
         pos: startPos,
         history: [],
@@ -52,6 +54,7 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
         acc: { x: 0, y: 0 },
         size: 0.8 + variety * 1.5,
         maxSpeed: config.maxSpeed * (0.8 + variety * 0.4),
+        idleSpeed: config.maxSpeed * idleSpeedMultiplier,
         maxForce: 0.2,
         angle: Math.random() * Math.PI * 2,
         bodyRatio: 0.9 + Math.random() * 0.4,
@@ -240,7 +243,8 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
         p.vel.x += p.acc.x;
         p.vel.y += p.acc.y;
         const spd = Math.sqrt(p.vel.x * p.vel.x + p.vel.y * p.vel.y);
-        const limit = config.shape === 'none' ? p.maxSpeed : config.maxSpeed;
+        // Use individual idle speed when mouse is stationary (free mode)
+        const limit = config.shape === 'none' ? p.idleSpeed : config.maxSpeed;
         if (spd > limit) {
           p.vel.x = (p.vel.x / spd) * limit;
           p.vel.y = (p.vel.y / spd) * limit;
