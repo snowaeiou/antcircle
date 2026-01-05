@@ -168,8 +168,13 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
       ctx.fillStyle = mode === 'day' ? '#ffffff' : '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      targetPos.current.x += (mousePos.current.x - targetPos.current.x) * 0.2;
-      targetPos.current.y += (mousePos.current.y - targetPos.current.y) * 0.2;
+      // Center mode: always target screen center, ignore mouse
+      const actualTarget = config.centerMode
+        ? { x: canvas.width / 2, y: canvas.height / 2 }
+        : mousePos.current;
+      
+      targetPos.current.x += (actualTarget.x - targetPos.current.x) * 0.2;
+      targetPos.current.y += (actualTarget.y - targetPos.current.y) * 0.2;
 
       grid.current.clear();
       particles.current.forEach((p, idx) => {
