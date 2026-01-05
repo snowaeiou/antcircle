@@ -188,31 +188,39 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
         let sensingActive = false;
         let sensorDist = 1.0;
 
-        for (let ox = -1; ox <= 1; ox++) {
-          for (let oy = -1; oy <= 1; oy++) {
-            const neighbors = grid.current.get(`${gx + ox},${gy + oy}`);
-            if (neighbors) {
-              neighbors.forEach((idx) => {
-                if (idx === i) return;
-                const other = particles.current[idx];
-                const dx = p.pos.x - other.pos.x;
-                const dy = p.pos.y - other.pos.y;
-                const dSq = dx * dx + dy * dy;
+        // Skip collision detection in performance mode for every other particle
+        const skipCollision = config.performanceMode && i % 2 === 0;
+        
+        if (!skipCollision) {
+          for (let ox = -1; ox <= 1; ox++) {
+            for (let oy = -1; oy <= 1; oy++) {
+              const neighbors = grid.current.get(`${gx + ox},${gy + oy}`);
+              if (neighbors) {
+                neighbors.forEach((idx) => {
+                  if (idx === i) return;
+                  const other = particles.current[idx];
+                  const dx = p.pos.x - other.pos.x;
+                  const dy = p.pos.y - other.pos.y;
+                  const dSq = dx * dx + dy * dy;
 
-                const currentCollisionRadius = COLLISION_RADIUS * config.antSize;
-                if (dSq > 0 && dSq < currentCollisionRadius * currentCollisionRadius) {
-                  const dist = Math.sqrt(dSq);
-                  const overlap = (currentCollisionRadius - dist) * 0.5;
-                  p.pos.x += (dx / dist) * overlap * config.separationForce;
-                  p.pos.y += (dy / dist) * overlap * config.separationForce;
-                }
+                  const currentCollisionRadius = COLLISION_RADIUS * config.antSize;
+                  if (dSq > 0 && dSq < currentCollisionRadius * currentCollisionRadius) {
+                    const dist = Math.sqrt(dSq);
+                    const overlap = (currentCollisionRadius - dist) * 0.5;
+                    p.pos.x += (dx / dist) * overlap * config.separationForce;
+                    p.pos.y += (dy / dist) * overlap * config.separationForce;
+                  }
 
-                const currentSensingRange = SENSING_RANGE * config.antSize;
-                if (dSq > 0 && dSq < currentSensingRange * currentSensingRange) {
-                  sensingActive = true;
-                  sensorDist = Math.sqrt(dSq) / currentSensingRange;
-                }
-              });
+                  // Skip sensing in performance mode
+                  if (!config.performanceMode) {
+                    const currentSensingRange = SENSING_RANGE * config.antSize;
+                    if (dSq > 0 && dSq < currentSensingRange * currentSensingRange) {
+                      sensingActive = true;
+                      sensorDist = Math.sqrt(dSq) / currentSensingRange;
+                    }
+                  }
+                });
+              }
             }
           }
         }
@@ -280,6 +288,14 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
           const iw = p.size * 10;
           const ih = (iw * img.height) / img.width;
           ctx.drawImage(img, -iw / 2, -ih / 2, iw, ih);
+        } else if (config.performanceMode) {
+          // Performance mode: simplified rendering - just ellipses, no legs/antennae
+          ctx.fillStyle = colorStr;
+          
+          // Simple body (single elongated ellipse)
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.size * 5, p.size * 2, 0, 0, Math.PI * 2);
+          ctx.fill();
         } else {
           ctx.fillStyle = colorStr;
 

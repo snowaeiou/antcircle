@@ -45,6 +45,7 @@ export interface PhysicsConfig {
   antSkinUrl: string | null;
   limbElasticity: number;
   antSize: number;
+  performanceMode: boolean;
 }
 
 export interface RealTimeStats {

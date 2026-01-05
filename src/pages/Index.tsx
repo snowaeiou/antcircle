@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import Visualizer from '../components/Visualizer';
 import ControlPanel from '../components/ControlPanel';
 import { ThemeMode, PhysicsConfig, RealTimeStats, ShapeType } from '../types';
-import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play } from 'lucide-react';
+import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap } from 'lucide-react';
 
 const Index: React.FC = () => {
   const [mode, setMode] = useState<ThemeMode>('night');
@@ -25,7 +25,8 @@ const Index: React.FC = () => {
     kingActive: false,
     antSkinUrl: null,
     limbElasticity: 1.2,
-    antSize: 1.0
+    antSize: 1.0,
+    performanceMode: false
   });
 
   const [stats, setStats] = useState<RealTimeStats>({
@@ -47,6 +48,10 @@ const Index: React.FC = () => {
 
   const toggleKing = useCallback(() => {
     setConfig((prev) => ({ ...prev, kingActive: !prev.kingActive }));
+  }, []);
+
+  const togglePerformanceMode = useCallback(() => {
+    setConfig((prev) => ({ ...prev, performanceMode: !prev.performanceMode }));
   }, []);
 
   const handleStatsUpdate = useCallback((newStats: RealTimeStats) => {
@@ -116,6 +121,19 @@ const Index: React.FC = () => {
             >
               <Crown size={16} />
               <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">蟻王</span>
+            </button>
+
+            <button
+              onClick={togglePerformanceMode}
+              className={`p-2.5 md:p-3 px-3 md:px-4 rounded-full transition-all active:scale-90 shadow-lg flex items-center gap-2 glass-button ${
+                config.performanceMode
+                  ? 'bg-green-500 text-white'
+                  : 'bg-secondary text-secondary-foreground border border-border'
+              }`}
+              title="效能模式"
+            >
+              <Zap size={16} />
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">效能</span>
             </button>
 
             <button
