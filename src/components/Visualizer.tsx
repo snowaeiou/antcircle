@@ -7,7 +7,6 @@ interface VisualizerProps {
   onStatsUpdate?: (stats: RealTimeStats) => void;
 }
 
-const TRAIL_LENGTH = 3;
 const GRID_SIZE = 40;
 const COLLISION_RADIUS = 12;
 const SENSING_RANGE = 35;
@@ -19,6 +18,9 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
   const targetPos = useRef<Vector2D>({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const globalPhase = useRef<number>(0);
   const antImg = useRef<HTMLImageElement | null>(null);
+  
+  // Pre-rendered ant canvases for performance
+  const antCache = useRef<Map<string, HTMLCanvasElement>>(new Map());
 
   const grid = useRef<Map<string, number[]>>(new Map());
   const lastTime = useRef(performance.now());
@@ -179,8 +181,6 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
       const sizeBase = Math.min(canvas.width, canvas.height) * 0.25 * config.shapeSize;
 
       particles.current.forEach((p, i) => {
-        p.history.push({ x: p.pos.x, y: p.pos.y });
-        if (p.history.length > TRAIL_LENGTH) p.history.shift();
 
         const gx = Math.floor(p.pos.x / GRID_SIZE);
         const gy = Math.floor(p.pos.y / GRID_SIZE);
