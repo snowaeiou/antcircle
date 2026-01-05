@@ -46,6 +46,7 @@ export interface PhysicsConfig {
   limbElasticity: number;
   antSize: number;
   performanceMode: boolean;
+  centerMode: boolean;
 }
 
 export interface RealTimeStats {

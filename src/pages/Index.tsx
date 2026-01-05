@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import Visualizer from '../components/Visualizer';
 import ControlPanel from '../components/ControlPanel';
 import { ThemeMode, PhysicsConfig, RealTimeStats, ShapeType } from '../types';
-import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap } from 'lucide-react';
+import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap, Target } from 'lucide-react';
 
 const Index: React.FC = () => {
   const [mode, setMode] = useState<ThemeMode>('night');
@@ -26,7 +26,8 @@ const Index: React.FC = () => {
     antSkinUrl: null,
     limbElasticity: 1.2,
     antSize: 1.0,
-    performanceMode: false
+    performanceMode: false,
+    centerMode: false
   });
 
   const [stats, setStats] = useState<RealTimeStats>({
@@ -52,6 +53,10 @@ const Index: React.FC = () => {
 
   const togglePerformanceMode = useCallback(() => {
     setConfig((prev) => ({ ...prev, performanceMode: !prev.performanceMode }));
+  }, []);
+
+  const toggleCenterMode = useCallback(() => {
+    setConfig((prev) => ({ ...prev, centerMode: !prev.centerMode }));
   }, []);
 
   const handleStatsUpdate = useCallback((newStats: RealTimeStats) => {
@@ -134,6 +139,19 @@ const Index: React.FC = () => {
             >
               <Zap size={16} />
               <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">效能</span>
+            </button>
+
+            <button
+              onClick={toggleCenterMode}
+              className={`p-2.5 md:p-3 px-3 md:px-4 rounded-full transition-all active:scale-90 shadow-lg flex items-center gap-2 glass-button ${
+                config.centerMode
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-secondary text-secondary-foreground border border-border'
+              }`}
+              title="中心模式"
+            >
+              <Target size={16} />
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">中心</span>
             </button>
 
             <button
