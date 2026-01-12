@@ -20,7 +20,7 @@ export interface Particle {
 }
 
 export type ThemeMode = 'day' | 'night';
-export type ShapeType = 'none' | 'donut' | 'square' | 'circle' | 'triangle';
+export type ShapeType = 'none' | 'donut' | 'square' | 'circle' | 'triangle' | 'filled-circle' | 'text';
 
 export interface MotionData {
   x: number;
@@ -47,6 +47,7 @@ export interface PhysicsConfig {
   antSize: number;
   performanceMode: boolean;
   centerMode: boolean;
+  textShape: string;
 }
 
 export interface RealTimeStats {
