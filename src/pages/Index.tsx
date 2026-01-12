@@ -91,6 +91,41 @@ const Index: React.FC = () => {
     document.documentElement.classList.add('dark');
   }, []);
 
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      switch (e.key.toLowerCase()) {
+        case 'p':
+          togglePause();
+          break;
+        case 'k':
+          toggleKing();
+          break;
+        case 'c':
+          toggleCenterMode();
+          break;
+        case 'z':
+          togglePerformanceMode();
+          break;
+        case 's':
+          setShowSettings(prev => !prev);
+          break;
+        case 'escape':
+          setShowSettings(false);
+          setShowInfo(false);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [togglePause, toggleKing, toggleCenterMode, togglePerformanceMode]);
+
   return (
     <PasswordGate>
     <div className="relative w-full h-screen transition-colors duration-500 overflow-hidden bg-background">
