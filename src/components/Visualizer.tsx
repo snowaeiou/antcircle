@@ -52,14 +52,15 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
       const startPos = { x: Math.random() * width, y: Math.random() * height };
       // Each ant has its own idle speed multiplier (0.3 to 1.0)
       const idleSpeedMultiplier = 0.3 + Math.random() * 0.7;
-      // Size variation: base size 1.0, variation controlled by sizeVariation (0-1)
-      const sizeVar = 1.0 + (variety - 0.5) * 2 * config.sizeVariation;
+      // Size: base size 1.5, variation controlled by sizeVariation (0 = all same, 1 = max variation)
+      const baseSize = 1.5;
+      const sizeMultiplier = 1.0 + (variety - 0.5) * 2 * config.sizeVariation;
       p.push({
         pos: startPos,
         history: [],
         vel: { x: (Math.random() - 0.5) * 5, y: (Math.random() - 0.5) * 5 },
         acc: { x: 0, y: 0 },
-        size: 0.8 + variety * 1.5 * sizeVar,
+        size: baseSize * sizeMultiplier,
         maxSpeed: config.maxSpeed * (0.8 + variety * 0.4),
         idleSpeed: config.maxSpeed * idleSpeedMultiplier,
         maxForce: 0.2,
