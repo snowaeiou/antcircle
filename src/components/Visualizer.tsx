@@ -52,12 +52,14 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
       const startPos = { x: Math.random() * width, y: Math.random() * height };
       // Each ant has its own idle speed multiplier (0.3 to 1.0)
       const idleSpeedMultiplier = 0.3 + Math.random() * 0.7;
+      // Size variation: base size 1.0, variation controlled by sizeVariation (0-1)
+      const sizeVar = 1.0 + (variety - 0.5) * 2 * config.sizeVariation;
       p.push({
         pos: startPos,
         history: [],
         vel: { x: (Math.random() - 0.5) * 5, y: (Math.random() - 0.5) * 5 },
         acc: { x: 0, y: 0 },
-        size: 0.8 + variety * 1.5,
+        size: 0.8 + variety * 1.5 * sizeVar,
         maxSpeed: config.maxSpeed * (0.8 + variety * 0.4),
         idleSpeed: config.maxSpeed * idleSpeedMultiplier,
         maxForce: 0.2,
@@ -69,7 +71,7 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
       });
     }
     particles.current = p;
-  }, [config.particleCount, config.maxSpeed]);
+  }, [config.particleCount, config.maxSpeed, config.sizeVariation]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -328,8 +330,8 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
         else if (p.pos.y > canvas.height + m) p.pos.y = -m;
 
         const isKing = i === 0 && config.kingActive;
-        const opacity = 0.5 + Math.min(spd / limit, 1.0) * 0.5;
-        let colorStr = mode === 'day' ? `rgba(0,0,0,${opacity})` : `rgba(255,255,255,${opacity})`;
+        // Solid colors - no transparency
+        let colorStr = mode === 'day' ? '#000000' : '#ffffff';
         if (isKing) colorStr = mode === 'day' ? '#D97706' : '#FBBF24';
 
         p.angle = Math.atan2(p.vel.y, p.vel.x);

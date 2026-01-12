@@ -48,15 +48,15 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ children }) => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-              <Lock className="w-8 h-8 text-muted-foreground" />
+            <div className="mx-auto w-16 h-16 rounded-full bg-neutral-900 flex items-center justify-center mb-4">
+              <Lock className="w-8 h-8 text-neutral-400" />
             </div>
-            <h1 className="text-2xl font-black tracking-tighter uppercase text-foreground">AntHive</h1>
-            <p className="text-sm text-muted-foreground">請輸入密碼以進入</p>
+            <h1 className="text-2xl font-black tracking-tighter uppercase text-white">AntHive</h1>
+            <p className="text-sm text-neutral-400">請輸入密碼以進入</p>
           </div>
 
           <div className="space-y-4">
@@ -68,17 +68,17 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ children }) => {
                 setError(false);
               }}
               placeholder="輸入密碼..."
-              className={`w-full px-4 py-3 rounded-xl bg-muted border text-foreground text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-primary transition-all ${
-                error ? "border-destructive shake" : "border-border"
+              className={`w-full px-4 py-3 rounded-xl bg-neutral-900 border text-white text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all ${
+                error ? "border-red-500 shake" : "border-neutral-700"
               }`}
               autoFocus
             />
 
-            {error && <p className="text-destructive text-sm text-center animate-fade-in">密碼錯誤，請重試</p>}
+            {error && <p className="text-red-500 text-sm text-center animate-fade-in">密碼錯誤，請重試</p>}
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-primary text-primary-foreground font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-opacity"
+              className="w-full py-3 rounded-xl bg-amber-500 text-black font-bold uppercase tracking-widest text-sm hover:bg-amber-400 transition-colors"
             >
               進入
             </button>
