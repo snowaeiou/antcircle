@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import Visualizer from '../components/Visualizer';
 import ControlPanel from '../components/ControlPanel';
+import PasswordGate from '../components/PasswordGate';
 import { ThemeMode, PhysicsConfig, RealTimeStats, ShapeType } from '../types';
 import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap, Target, CircleDot, Type } from 'lucide-react';
 
@@ -90,6 +91,7 @@ const Index: React.FC = () => {
   }, []);
 
   return (
+    <PasswordGate>
     <div className="relative w-full h-screen transition-colors duration-500 overflow-hidden bg-background">
       <Visualizer mode={mode} config={config} onStatsUpdate={handleStatsUpdate} />
 
@@ -348,6 +350,7 @@ const Index: React.FC = () => {
         </div>
       )}
     </div>
+    </PasswordGate>
   );
 };
 
