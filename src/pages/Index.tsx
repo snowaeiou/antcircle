@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import Visualizer from '../components/Visualizer';
 import ControlPanel from '../components/ControlPanel';
 import { ThemeMode, PhysicsConfig, RealTimeStats, ShapeType } from '../types';
-import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap, Target } from 'lucide-react';
+import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap, Target, CircleDot, Type } from 'lucide-react';
 
 const Index: React.FC = () => {
   const [mode, setMode] = useState<ThemeMode>('night');
@@ -27,8 +27,12 @@ const Index: React.FC = () => {
     limbElasticity: 1.2,
     antSize: 1.0,
     performanceMode: false,
-    centerMode: false
+    centerMode: false,
+    textShape: ''
   });
+
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textInputValue, setTextInputValue] = useState('');
 
   const [stats, setStats] = useState<RealTimeStats>({
     fps: 0,
@@ -65,8 +69,18 @@ const Index: React.FC = () => {
 
   const setShape = (shape: ShapeType) => {
     setConfig((prev) => ({ ...prev, shape }));
+    if (shape === 'text') {
+      setShowTextInput(true);
+    }
     if (typeof window !== 'undefined' && window.navigator?.vibrate) {
       window.navigator.vibrate(10);
+    }
+  };
+
+  const handleTextSubmit = () => {
+    if (textInputValue.trim()) {
+      setConfig((prev) => ({ ...prev, textShape: textInputValue.trim(), shape: 'text' }));
+      setShowTextInput(false);
     }
   };
 
@@ -213,7 +227,52 @@ const Index: React.FC = () => {
             >
               <Triangle size={16} />
             </button>
+            <button
+              onClick={() => setShape('filled-circle')}
+              className={`p-2 rounded-lg transition-all ${
+                config.shape === 'filled-circle' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+              }`}
+              title="實心圓"
+            >
+              <CircleDot size={16} />
+            </button>
+            <button
+              onClick={() => setShape('text')}
+              className={`p-2 rounded-lg transition-all ${
+                config.shape === 'text' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+              }`}
+              title="文字陣型"
+            >
+              <Type size={16} />
+            </button>
           </div>
+
+          {/* Text Input for Text Shape */}
+          {showTextInput && (
+            <div className="p-3 rounded-2xl glass-panel flex gap-2 items-center animate-fade-in">
+              <input
+                type="text"
+                value={textInputValue}
+                onChange={(e) => setTextInputValue(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleTextSubmit()}
+                placeholder="輸入文字..."
+                className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                autoFocus
+              />
+              <button
+                onClick={handleTextSubmit}
+                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-bold"
+              >
+                確定
+              </button>
+              <button
+                onClick={() => setShowTextInput(false)}
+                className="px-3 py-2 rounded-lg bg-muted text-muted-foreground text-sm"
+              >
+                取消
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right Panel */}

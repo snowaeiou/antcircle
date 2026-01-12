@@ -21,6 +21,9 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
   
   // Pre-rendered ant canvases for performance
   const antCache = useRef<Map<string, HTMLCanvasElement>>(new Map());
+  
+  // Text shape positions cache
+  const textPositions = useRef<Vector2D[]>([]);
 
   const grid = useRef<Map<string, number[]>>(new Map());
   const lastTime = useRef(performance.now());
@@ -80,6 +83,40 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Generate text positions when textShape changes
+  useEffect(() => {
+    if (config.shape === 'text' && config.textShape) {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      const fontSize = 120;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${fontSize}px "Noto Sans TC", "Microsoft JhengHei", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(config.textShape, canvas.width / 2, canvas.height / 2);
+      
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const positions: Vector2D[] = [];
+      const step = 4; // Sample every 4 pixels for performance
+      
+      for (let y = 0; y < canvas.height; y += step) {
+        for (let x = 0; x < canvas.width; x += step) {
+          const index = (y * canvas.width + x) * 4;
+          if (imageData.data[index] > 128) {
+            positions.push({ x, y });
+          }
+        }
+      }
+      
+      textPositions.current = positions;
+    }
+  }, [config.textShape, config.shape]);
+
   const getQueuePosition = (t: number, shape: string, size: number, seed: number): Vector2D => {
     const angle = t * Math.PI * 2;
     const jX = (seed - 0.5) * 8;
@@ -91,6 +128,12 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
       case 'donut':
         const r = size * (0.7 + Math.sin(seed * 100) * 0.2);
         return { x: Math.cos(angle) * r + jX, y: Math.sin(angle) * r + jY };
+      case 'filled-circle': {
+        // Distribute points evenly inside a circle using sqrt for uniform density
+        const radius = Math.sqrt(seed) * size;
+        const a = t * Math.PI * 2 + seed * 10;
+        return { x: Math.cos(a) * radius + jX, y: Math.sin(a) * radius + jY };
+      }
       case 'square': {
         const p = (t * 4) % 4;
         let x, y;
@@ -236,6 +279,15 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
           const r = (80 + p.variationSeed * 100) * config.shapeSize;
           targetX = targetPos.current.x + Math.cos(orbitAngle) * r;
           targetY = targetPos.current.y + Math.sin(orbitAngle) * r;
+        } else if (config.shape === 'text' && textPositions.current.length > 0) {
+          // Text shape: assign each ant to a text pixel position
+          const posIndex = i % textPositions.current.length;
+          const textPos = textPositions.current[posIndex];
+          // Scale based on shapeSize
+          const centerX = canvas.width / 2;
+          const centerY = canvas.height / 2;
+          targetX = centerX + (textPos.x - centerX) * config.shapeSize;
+          targetY = centerY + (textPos.y - centerY) * config.shapeSize;
         } else {
           const t = (globalPhase.current + i / particles.current.length) % 1;
           const offset = getQueuePosition(t, config.shape, sizeBase, p.variationSeed);
