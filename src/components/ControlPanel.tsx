@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PhysicsConfig, ThemeMode } from '../types';
-import { X, Sliders, Users, FastForward, Magnet, Waves, Pause, Play, Crown, Maximize, Upload, Trash2, Image as ImageIcon, Wind, Zap, Scaling, Shuffle } from 'lucide-react';
+import { X, Sliders, Users, FastForward, Magnet, Pause, Play, Crown, Maximize, Image as ImageIcon, Wind, Zap, Scaling, Shuffle, Save, RotateCcw } from 'lucide-react';
 
 interface ControlPanelProps {
   isOpen: boolean;
@@ -10,8 +10,41 @@ interface ControlPanelProps {
   mode: ThemeMode;
 }
 
+interface SavedPreset {
+  name: string;
+  config: Partial<PhysicsConfig>;
+}
+
+const PRESET_STORAGE_KEY = 'anthive_presets';
+const MAX_PRESETS = 3;
+
+// Keys to save in presets (exclude runtime states)
+const PRESET_KEYS: (keyof PhysicsConfig)[] = [
+  'particleCount', 'maxSpeed', 'attractStrength', 'damping', 
+  'shapeSize', 'limbElasticity', 'antSize', 'sizeVariation'
+];
+
 const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, setConfig, mode }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [presets, setPresets] = useState<SavedPreset[]>([]);
+  const [presetName, setPresetName] = useState('');
+
+  // Load presets from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(PRESET_STORAGE_KEY);
+    if (saved) {
+      try {
+        setPresets(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load presets:', e);
+      }
+    }
+  }, []);
+
+  // Save presets to localStorage
+  const savePresetsToStorage = (newPresets: SavedPreset[]) => {
+    localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(newPresets));
+    setPresets(newPresets);
+  };
 
   const handleChange = (key: keyof PhysicsConfig, val: unknown) => {
     setConfig((prev) => ({ ...prev, [key]: val }));
@@ -20,27 +53,30 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type - only allow safe image formats (no SVG/HTML)
-      const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        console.error('Invalid file type. Only PNG, JPEG, GIF, and WebP are allowed.');
-        return;
-      }
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        console.error('File too large. Maximum size is 5MB.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const url = event.target?.result as string;
-        handleChange('antSkinUrl', url);
-      };
-      reader.readAsDataURL(file);
+  const handleSavePreset = () => {
+    if (presets.length >= MAX_PRESETS) {
+      return;
     }
+    const name = presetName.trim() || `預設 ${presets.length + 1}`;
+    const presetConfig: Partial<PhysicsConfig> = {};
+    PRESET_KEYS.forEach(key => {
+      (presetConfig as any)[key] = config[key];
+    });
+    const newPresets = [...presets, { name, config: presetConfig }];
+    savePresetsToStorage(newPresets);
+    setPresetName('');
+  };
+
+  const handleLoadPreset = (preset: SavedPreset) => {
+    setConfig(prev => ({ ...prev, ...preset.config }));
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(10);
+    }
+  };
+
+  const handleDeletePreset = (index: number) => {
+    const newPresets = presets.filter((_, i) => i !== index);
+    savePresetsToStorage(newPresets);
   };
 
   if (!isOpen) return null;
@@ -62,38 +98,60 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
       </div>
 
       <div className="space-y-6 pb-12">
+        {/* Preset Section */}
+        <div className="p-4 rounded-2xl bg-muted/50 border border-border space-y-4">
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <Save size={12} /> 預設儲存 ({presets.length}/{MAX_PRESETS})
+          </label>
+
+          {/* Saved Presets */}
+          {presets.length > 0 && (
+            <div className="space-y-2">
+              {presets.map((preset, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleLoadPreset(preset)}
+                    className="flex-1 py-2 px-3 text-left text-xs font-bold bg-muted hover:bg-primary hover:text-primary-foreground rounded-lg transition-all truncate"
+                  >
+                    {preset.name}
+                  </button>
+                  <button
+                    onClick={() => handleDeletePreset(index)}
+                    className="p-2 hover:bg-destructive hover:text-destructive-foreground rounded-lg transition-colors"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Save New Preset */}
+          {presets.length < MAX_PRESETS && (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={presetName}
+                onChange={(e) => setPresetName(e.target.value)}
+                placeholder={`預設 ${presets.length + 1}`}
+                className="flex-1 px-3 py-2 text-xs bg-background border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary"
+                maxLength={20}
+              />
+              <button
+                onClick={handleSavePreset}
+                className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+              >
+                <Save size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Appearance Section */}
         <div className="p-4 rounded-2xl bg-muted/50 border border-border space-y-4">
           <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
             <ImageIcon size={12} /> 外觀與彈性
           </label>
-
-          <div className="flex flex-col gap-3">
-            {!config.antSkinUrl ? (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-6 border-2 border-dashed border-border rounded-xl flex flex-col items-center gap-2 hover:border-primary hover:text-primary transition-all group"
-              >
-                <Upload size={24} className="group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">上傳自定義造型 (PNG)</span>
-              </button>
-            ) : (
-              <div className="relative group">
-                <img
-                  src={config.antSkinUrl}
-                  alt="Skin Preview"
-                  className="w-full h-32 object-contain bg-muted rounded-xl p-4 border border-border"
-                />
-                <button
-                  onClick={() => handleChange('antSkinUrl', null)}
-                  className="absolute top-2 right-2 p-2 bg-destructive text-destructive-foreground rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            )}
-            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept="image/png,image/jpeg,image/gif,image/webp" className="hidden" />
-          </div>
 
           {/* Ant Size Slider */}
           <div className="pt-2 space-y-3">
