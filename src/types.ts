@@ -48,6 +48,7 @@ export interface PhysicsConfig {
   performanceMode: boolean;
   centerMode: boolean;
   textShape: string;
+  sizeVariation: number;
 }
 
 export interface RealTimeStats {

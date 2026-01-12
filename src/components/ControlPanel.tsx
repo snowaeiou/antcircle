@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { PhysicsConfig, ThemeMode } from '../types';
-import { X, Sliders, Users, FastForward, Magnet, Waves, Pause, Play, Crown, Maximize, Upload, Trash2, Image as ImageIcon, Wind, Zap, Scaling } from 'lucide-react';
+import { X, Sliders, Users, FastForward, Magnet, Waves, Pause, Play, Crown, Maximize, Upload, Trash2, Image as ImageIcon, Wind, Zap, Scaling, Shuffle } from 'lucide-react';
 
 interface ControlPanelProps {
   isOpen: boolean;
@@ -111,6 +111,25 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
               value={config.antSize}
               onChange={(e) => handleChange('antSize', parseFloat(e.target.value))}
               className="w-full accent-accent h-1.5 bg-muted rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+
+          {/* Size Variation Slider */}
+          <div className="pt-2 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Shuffle size={12} className="text-primary" /> 大小差異
+              </label>
+              <span className="text-xs font-mono font-bold">{(config.sizeVariation * 100).toFixed(0)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1.0"
+              step="0.05"
+              value={config.sizeVariation}
+              onChange={(e) => handleChange('sizeVariation', parseFloat(e.target.value))}
+              className="w-full accent-primary h-1.5 bg-muted rounded-lg appearance-none cursor-pointer"
             />
           </div>
 
