@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PhysicsConfig, ThemeMode } from '../types';
-import { X, Sliders, Users, FastForward, Magnet, Pause, Play, Crown, Maximize, Image as ImageIcon, Wind, Zap, Scaling, Shuffle, Save, RotateCcw } from 'lucide-react';
+import { X, Sliders, Users, FastForward, Magnet, Pause, Play, Crown, Maximize, Image as ImageIcon, Wind, Zap, Scaling, Shuffle, Save, Download, Upload } from 'lucide-react';
 
 interface ControlPanelProps {
   isOpen: boolean;
@@ -79,6 +79,45 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
     savePresetsToStorage(newPresets);
   };
 
+  const handleExportPresets = () => {
+    if (presets.length === 0) return;
+    const dataStr = JSON.stringify(presets, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'anthive-presets.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportPresets = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target?.result as string) as SavedPreset[];
+        if (!Array.isArray(imported)) throw new Error('Invalid format');
+        
+        // Merge with existing, up to max
+        const merged = [...presets];
+        for (const preset of imported) {
+          if (merged.length >= MAX_PRESETS) break;
+          if (preset.name && preset.config) {
+            merged.push(preset);
+          }
+        }
+        savePresetsToStorage(merged.slice(0, MAX_PRESETS));
+      } catch (err) {
+        console.error('Failed to import presets:', err);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -139,12 +178,34 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
               />
               <button
                 onClick={handleSavePreset}
-                className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+                className="p-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+                title="儲存預設"
               >
                 <Save size={14} />
               </button>
             </div>
           )}
+
+          {/* Export/Import */}
+          <div className="flex gap-2 pt-2 border-t border-border">
+            <button
+              onClick={handleExportPresets}
+              disabled={presets.length === 0}
+              className="flex-1 py-2 px-3 text-xs font-bold bg-muted hover:bg-accent hover:text-accent-foreground rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              title="匯出預設"
+            >
+              <Download size={12} /> 匯出
+            </button>
+            <label className="flex-1 py-2 px-3 text-xs font-bold bg-muted hover:bg-accent hover:text-accent-foreground rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <Upload size={12} /> 匯入
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportPresets}
+                className="hidden"
+              />
+            </label>
+          </div>
         </div>
 
         {/* Appearance Section */}
