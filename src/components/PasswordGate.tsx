@@ -5,8 +5,10 @@ interface PasswordGateProps {
   children: React.ReactNode;
 }
 
-// Simple hash function for basic obfuscation (not cryptographically secure)
-const CORRECT_PASSWORD_HASH = "123456";
+// NOTE: This is a DEMO access gate for convenience, NOT a security feature.
+// The code is visible in the browser bundle - do not use for sensitive content.
+// For real protection, use server-side authentication (e.g., Supabase Auth).
+const DEMO_ACCESS_CODE = "123456";
 
 const PasswordGate: React.FC<PasswordGateProps> = ({ children }) => {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -25,7 +27,7 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ children }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === CORRECT_PASSWORD_HASH) {
+    if (password === DEMO_ACCESS_CODE) {
       localStorage.setItem("anthive_unlocked", "true");
       setIsUnlocked(true);
       setError(false);
