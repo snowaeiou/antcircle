@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PhysicsConfig, ThemeMode } from '../types';
-import { X, Sliders, Users, FastForward, Magnet, Pause, Play, Crown, Maximize, Image as ImageIcon, Wind, Zap, Scaling, Shuffle, Save, Download, Upload } from 'lucide-react';
+import { X, Sliders, Users, FastForward, Magnet, Pause, Play, Crown, Maximize, Image as ImageIcon, Wind, Zap, Scaling, Shuffle, Save, Download, Upload, ImagePlus, Eye, EyeOff, Trash2 } from 'lucide-react';
 
 interface ControlPanelProps {
   isOpen: boolean;
@@ -118,6 +118,31 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
     e.target.value = ''; // Reset input
   };
 
+  // Background image upload
+  const handleBackgroundUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      console.error('Invalid file type');
+      return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      handleChange('backgroundUrl', dataUrl);
+      handleChange('backgroundEnabled', true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleRemoveBackground = () => {
+    handleChange('backgroundUrl', null);
+    handleChange('backgroundEnabled', false);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -206,6 +231,77 @@ const ControlPanel: React.FC<ControlPanelProps> = ({ isOpen, onClose, config, se
               />
             </label>
           </div>
+        </div>
+
+        {/* Background Section */}
+        <div className="p-4 rounded-2xl bg-muted/50 border border-border space-y-4">
+          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <ImagePlus size={12} /> 背景圖片
+          </label>
+
+          {/* Upload / Current Background */}
+          {config.backgroundUrl ? (
+            <div className="space-y-3">
+              {/* Preview */}
+              <div className="relative rounded-lg overflow-hidden border border-border h-20">
+                <img
+                  src={config.backgroundUrl}
+                  alt="Background"
+                  className="w-full h-full object-cover"
+                  style={{ transform: `scale(${config.backgroundScale})` }}
+                />
+              </div>
+              
+              {/* Toggle & Delete */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleChange('backgroundEnabled', !config.backgroundEnabled)}
+                  className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                    config.backgroundEnabled
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted hover:bg-accent hover:text-accent-foreground'
+                  }`}
+                >
+                  {config.backgroundEnabled ? <Eye size={12} /> : <EyeOff size={12} />}
+                  {config.backgroundEnabled ? '顯示' : '隱藏'}
+                </button>
+                <button
+                  onClick={handleRemoveBackground}
+                  className="py-2 px-3 text-xs font-bold bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+                >
+                  <Trash2 size={12} /> 移除
+                </button>
+              </div>
+
+              {/* Scale Slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-muted-foreground">縮放</span>
+                  <span className="text-xs font-mono font-bold">{(config.backgroundScale * 100).toFixed(0)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="3.0"
+                  step="0.1"
+                  value={config.backgroundScale}
+                  onChange={(e) => handleChange('backgroundScale', parseFloat(e.target.value))}
+                  className="w-full accent-primary h-1.5 bg-muted rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-xl cursor-pointer hover:bg-muted/50 transition-colors">
+              <ImagePlus size={24} className="text-muted-foreground mb-2" />
+              <span className="text-xs font-bold text-muted-foreground">點擊上傳 JPG/PNG</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleBackgroundUpload}
+                className="hidden"
+              />
+            </label>
+          )}
         </div>
 
         {/* Appearance Section */}

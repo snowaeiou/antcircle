@@ -30,7 +30,10 @@ const Index: React.FC = () => {
     performanceMode: false,
     centerMode: false,
     textShape: '',
-    sizeVariation: 0.5
+    sizeVariation: 0.5,
+    backgroundUrl: null,
+    backgroundEnabled: true,
+    backgroundScale: 1.0
   });
 
   const [showTextInput, setShowTextInput] = useState(false);
