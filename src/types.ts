@@ -49,6 +49,9 @@ export interface PhysicsConfig {
   centerMode: boolean;
   textShape: string;
   sizeVariation: number;
+  backgroundUrl: string | null;
+  backgroundEnabled: boolean;
+  backgroundScale: number;
 }
 
 export interface RealTimeStats {

@@ -18,6 +18,7 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
   const targetPos = useRef<Vector2D>({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const globalPhase = useRef<number>(0);
   const antImg = useRef<HTMLImageElement | null>(null);
+  const bgImg = useRef<HTMLImageElement | null>(null);
   
   // Pre-rendered ant canvases for performance
   const antCache = useRef<Map<string, HTMLCanvasElement>>(new Map());
@@ -41,6 +42,19 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
       antImg.current = null;
     }
   }, [config.antSkinUrl]);
+
+  // Load background image
+  useEffect(() => {
+    if (config.backgroundUrl) {
+      const img = new Image();
+      img.src = config.backgroundUrl;
+      img.onload = () => {
+        bgImg.current = img;
+      };
+    } else {
+      bgImg.current = null;
+    }
+  }, [config.backgroundUrl]);
 
   useEffect(() => {
     const p: Particle[] = [];
@@ -213,6 +227,17 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
 
       ctx.fillStyle = mode === 'day' ? '#ffffff' : '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw background image if enabled
+      if (config.backgroundEnabled && bgImg.current) {
+        const img = bgImg.current;
+        const scale = config.backgroundScale;
+        const imgWidth = img.width * scale;
+        const imgHeight = img.height * scale;
+        const x = (canvas.width - imgWidth) / 2;
+        const y = (canvas.height - imgHeight) / 2;
+        ctx.drawImage(img, x, y, imgWidth, imgHeight);
+      }
 
       // Center mode: always target screen center, ignore mouse
       const actualTarget = config.centerMode
