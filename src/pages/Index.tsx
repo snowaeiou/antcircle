@@ -414,6 +414,7 @@ const Index: React.FC = () => {
           </div>
         </div>
       )}
+      </>)}
     </div>
     </PasswordGate>
   );
