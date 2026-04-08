@@ -9,6 +9,7 @@ const Index: React.FC = () => {
   const [mode, setMode] = useState<ThemeMode>('night');
   const [showInfo, setShowInfo] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [hideUI, setHideUI] = useState(false);
 
   const [config, setConfig] = useState<PhysicsConfig>({
     particleCount: 800,
@@ -130,6 +131,9 @@ const Index: React.FC = () => {
           setShowSettings(false);
           setShowInfo(false);
           break;
+        case 'h':
+          setHideUI(prev => !prev);
+          break;
       }
     };
 
@@ -142,6 +146,7 @@ const Index: React.FC = () => {
     <div className="relative w-full h-screen transition-colors duration-500 overflow-hidden bg-background">
       <Visualizer mode={mode} config={config} onStatsUpdate={handleStatsUpdate} />
 
+      {!hideUI && (<>
       {/* Top Controls */}
       <div className="absolute top-0 left-0 w-full p-4 md:p-6 flex justify-between items-start pointer-events-none">
         {/* Left Panel */}
