@@ -29,6 +29,7 @@ const Index: React.FC = () => {
     antSize: 1.0,
     performanceMode: false,
     centerMode: false,
+    roamMode: false,
     textShape: '',
     sizeVariation: 0.5,
     backgroundUrl: null,
