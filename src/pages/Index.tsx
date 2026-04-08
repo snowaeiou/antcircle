@@ -120,6 +120,9 @@ const Index: React.FC = () => {
         case 'z':
           togglePerformanceMode();
           break;
+        case 'r':
+          toggleRoamMode();
+          break;
         case 's':
           setShowSettings(prev => !prev);
           break;
@@ -132,7 +135,7 @@ const Index: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePause, toggleKing, toggleCenterMode, togglePerformanceMode]);
+  }, [togglePause, toggleKing, toggleCenterMode, togglePerformanceMode, toggleRoamMode]);
 
   return (
     <PasswordGate>
@@ -212,6 +215,19 @@ const Index: React.FC = () => {
             >
               <Target size={16} />
               <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">中心</span>
+            </button>
+
+            <button
+              onClick={toggleRoamMode}
+              className={`p-2.5 md:p-3 px-3 md:px-4 rounded-full transition-all active:scale-90 shadow-lg flex items-center gap-2 glass-button ${
+                config.roamMode
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-secondary text-secondary-foreground border border-border'
+              }`}
+              title="漫遊模式 (R)"
+            >
+              <Compass size={16} />
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">漫遊</span>
             </button>
 
             <button
