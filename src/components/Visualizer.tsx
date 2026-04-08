@@ -25,6 +25,9 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
   
   // Text shape positions cache
   const textPositions = useRef<Vector2D[]>([]);
+  
+  // Roam mode: each ant has its own random target
+  const roamTargets = useRef<Vector2D[]>([]);
 
   const grid = useRef<Map<string, number[]>>(new Map());
   const lastTime = useRef(performance.now());
@@ -302,16 +305,28 @@ const Visualizer: React.FC<VisualizerProps> = ({ mode, config, onStatsUpdate }) 
         }
 
         let targetX, targetY;
-        if (config.shape === 'none') {
+        if (config.roamMode) {
+          // Roam mode: each ant has its own random wandering target
+          if (!roamTargets.current[i]) {
+            roamTargets.current[i] = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
+          }
+          const rt = roamTargets.current[i];
+          const rdx = rt.x - p.pos.x;
+          const rdy = rt.y - p.pos.y;
+          // Pick new target when close enough
+          if (rdx * rdx + rdy * rdy < 2500) {
+            roamTargets.current[i] = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
+          }
+          targetX = roamTargets.current[i].x;
+          targetY = roamTargets.current[i].y;
+        } else if (config.shape === 'none') {
           const orbitAngle = time * 0.001 + p.variationSeed * Math.PI * 2;
           const r = (80 + p.variationSeed * 100) * config.shapeSize;
           targetX = targetPos.current.x + Math.cos(orbitAngle) * r;
           targetY = targetPos.current.y + Math.sin(orbitAngle) * r;
         } else if (config.shape === 'text' && textPositions.current.length > 0) {
-          // Text shape: assign each ant to a text pixel position
           const posIndex = i % textPositions.current.length;
           const textPos = textPositions.current[posIndex];
-          // Scale based on shapeSize
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
           targetX = centerX + (textPos.x - centerX) * config.shapeSize;

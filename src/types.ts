@@ -47,6 +47,7 @@ export interface PhysicsConfig {
   antSize: number;
   performanceMode: boolean;
   centerMode: boolean;
+  roamMode: boolean;
   textShape: string;
   sizeVariation: number;
   backgroundUrl: string | null;

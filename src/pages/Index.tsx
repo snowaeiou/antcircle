@@ -3,7 +3,7 @@ import Visualizer from '../components/Visualizer';
 import ControlPanel from '../components/ControlPanel';
 import PasswordGate from '../components/PasswordGate';
 import { ThemeMode, PhysicsConfig, RealTimeStats, ShapeType } from '../types';
-import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap, Target, CircleDot, Type } from 'lucide-react';
+import { Sun, Moon, Info, Settings, Activity, Circle, Square, Triangle, Disc, Crown, Pause, Play, Zap, Target, CircleDot, Type, Compass } from 'lucide-react';
 
 const Index: React.FC = () => {
   const [mode, setMode] = useState<ThemeMode>('night');
@@ -29,6 +29,7 @@ const Index: React.FC = () => {
     antSize: 1.0,
     performanceMode: false,
     centerMode: false,
+    roamMode: false,
     textShape: '',
     sizeVariation: 0.5,
     backgroundUrl: null,
@@ -65,7 +66,11 @@ const Index: React.FC = () => {
   }, []);
 
   const toggleCenterMode = useCallback(() => {
-    setConfig((prev) => ({ ...prev, centerMode: !prev.centerMode }));
+    setConfig((prev) => ({ ...prev, centerMode: !prev.centerMode, roamMode: false }));
+  }, []);
+
+  const toggleRoamMode = useCallback(() => {
+    setConfig((prev) => ({ ...prev, roamMode: !prev.roamMode, centerMode: false }));
   }, []);
 
   const handleStatsUpdate = useCallback((newStats: RealTimeStats) => {
@@ -115,6 +120,9 @@ const Index: React.FC = () => {
         case 'z':
           togglePerformanceMode();
           break;
+        case 'r':
+          toggleRoamMode();
+          break;
         case 's':
           setShowSettings(prev => !prev);
           break;
@@ -127,7 +135,7 @@ const Index: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePause, toggleKing, toggleCenterMode, togglePerformanceMode]);
+  }, [togglePause, toggleKing, toggleCenterMode, togglePerformanceMode, toggleRoamMode]);
 
   return (
     <PasswordGate>
@@ -207,6 +215,19 @@ const Index: React.FC = () => {
             >
               <Target size={16} />
               <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">中心</span>
+            </button>
+
+            <button
+              onClick={toggleRoamMode}
+              className={`p-2.5 md:p-3 px-3 md:px-4 rounded-full transition-all active:scale-90 shadow-lg flex items-center gap-2 glass-button ${
+                config.roamMode
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-secondary text-secondary-foreground border border-border'
+              }`}
+              title="漫遊模式 (R)"
+            >
+              <Compass size={16} />
+              <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider hidden sm:inline">漫遊</span>
             </button>
 
             <button
